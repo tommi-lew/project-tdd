@@ -14,7 +14,21 @@ class Poller
     if !is_test
       endpoint_url = "http://www.sbstransit.com.sg/iris_api/nextbus.aspx?svc=#{bus_no}&busstop=#{station_no}&iriskey=#{ENV['SBS_TRANSIT_API_KEY']}"
       uri = URI(endpoint_url)
-      response = Net::HTTP.get(uri)
+
+      req = Net::HTTP::Get.new(uri.request_uri)
+      req['User-Agent'] = "SBSTransitIris/81 CFNetwork/548.1.4 Darwin/11.0.0"
+      req['Accept'] = "*/*"
+      req['Accept-Language'] = "en-gb"
+      req['Cookie'] = "rl-sticky-key=c0a80899"
+      req['Pragma'] = "no-cache"
+      req['Connection'] = "keep-alive"
+      req['Proxy-Connection'] = "keep-alive"
+      req.delete('Content')
+
+      res = Net::HTTP.start(uri.hostname, uri.port) { |http|
+        http.request(req)
+      }
+
       response = "fake response"
     end
 
@@ -30,4 +44,3 @@ class Poller
     new_record.save
   end
 end
-
