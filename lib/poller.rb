@@ -3,6 +3,7 @@ require 'net/http'
 
 class Poller
   def self.poll(station_no, bus_no, is_test=false)
+  def self.poll(station_no, bus_no, is_test='false')
     time_now = Time.now
     is_test = is_test.to_bool
 
