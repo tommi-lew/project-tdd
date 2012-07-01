@@ -4,14 +4,19 @@ require 'net/http'
 class Poller
   def self.poll(station_no, bus_no, is_test=false)
     time_now = Time.now
-    puts "Attempting to get bus arrival time at #{time_now.to_s}..."
-    return "off" if time_now.hour >= 1 && time_now.hour <= 6
+    is_test = is_test.to_bool
 
-    puts "Invoking endpoint for svc:#{bus_no} & busstop:#{station_no}"
+    puts "Getting bus arrival time at #{time_now.to_s}"
 
-    response = "fake response"
+    if time_now.hour >= 1 && time_now.hour <= 6
+      puts "off"
+      return "off"
+    elsif is_test
+      puts "fake response"
+      return "fake response"
+    end
 
-    if !is_test
+    if is_test == false
       endpoint_url = "http://www.sbstransit.com.sg/iris_api/nextbus.aspx?svc=#{bus_no}&busstop=#{station_no}&iriskey=#{ENV['SBS_TRANSIT_API_KEY']}"
       uri = URI(endpoint_url)
 
@@ -25,20 +30,22 @@ class Poller
       req['Proxy-Connection'] = "keep-alive"
       req.delete('Content')
 
-      response = Net::HTTP.start(uri.hostname, uri.port) { |http|
+      response = Net::HTTP.start(uri.host, uri.port) { |http|
         http.request(req)
       }
     end
 
-    puts "Response: #{response}"
+    puts "Response: #{response.body}"
 
     new_record = BusArrival.new(
       :poll_at => Time.now.to_i.to_s,
       :station_no => station_no,
       :bus_no => bus_no,
-      :result => response,
+      :result => response.body,
       :is_test => is_test
     )
     new_record.save
+
+    response.body
   end
 end
