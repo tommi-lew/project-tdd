@@ -25,11 +25,9 @@ class Poller
       req['Proxy-Connection'] = "keep-alive"
       req.delete('Content')
 
-      res = Net::HTTP.start(uri.hostname, uri.port) { |http|
+      response = Net::HTTP.start(uri.hostname, uri.port) { |http|
         http.request(req)
       }
-
-      response = "fake response"
     end
 
     puts "Response: #{response}"
