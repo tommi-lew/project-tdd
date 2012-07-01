@@ -3,6 +3,10 @@ require 'net/http'
 
 class Poller
   def self.poll(station_no, bus_no, is_test=false)
+    time_now = Time.now
+    puts "Attempting to get bus arrival time at #{time_now.to_s}..."
+    return "off" if time_now.hour >= 1 && time_now.hour <= 6
+
     puts "Invoking endpoint for svc:#{bus_no} & busstop:#{station_no}"
 
     response = "fake response"
